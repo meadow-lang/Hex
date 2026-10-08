@@ -1,7 +1,7 @@
 # hex
 
 Encode bytes as hexadecimal text and decode it back, for
-[Meadow](https://github.com/mcdearman/meadow).
+[Meadow](https://github.com/meadow-lang/meadow).
 
 This package is a port of Rust's [`hex`](https://github.com/KokaKiwi/rust-hex)
 0.4.3, with the same error messages.
@@ -9,7 +9,7 @@ This package is a port of Rust's [`hex`](https://github.com/KokaKiwi/rust-hex)
 ## Install
 
 ```sh
-meadow add mcdearman/Hex
+meadow add meadow-lang/Hex
 ```
 
 ## Use
