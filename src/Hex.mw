@@ -8,8 +8,8 @@
 use Std.St as St
 use Hex.Tables (quotedBytes)
 
-@pub data FromHexError =
-  -- A byte that is not a hex digit, taken as a character, and where it is.
+@pub data FromHexError
+  = -- A byte that is not a hex digit, taken as a character, and where it is.
   InvalidHexCharacter Char Int
   -- An odd number of digits.
   | OddLength
@@ -28,7 +28,8 @@ fun fieldAt i =
 
 @pub fun errorMessage e =
   match e with
-  | FromHexError.InvalidHexCharacter c index -> "Invalid character ${quoted (charCode c)} at position ${index}"
+  | FromHexError.InvalidHexCharacter c index ->
+      "Invalid character ${quoted (charCode c)} at position ${index}"
   | FromHexError.OddLength -> "Odd number of digits"
   | FromHexError.InvalidStringLength -> "Invalid string length"
 
@@ -41,8 +42,7 @@ fun digitsOf table (input : #[UInt8]) =
         let b = toInt (arrayGet input i) in
         let _ = St.set buf (2 * i) (stringByteAt table (b / 16)) in
         St.set buf (2 * i + 1) (stringByteAt table (b % 16)))
-    in
-    St.freeze buf)
+    in St.freeze buf)
 
 -- `input` as lower-case hex.
 @pub fun encode (input : #[UInt8]) = bytesToString (digitsOf "0123456789abcdef" input)
@@ -60,19 +60,15 @@ fun digitsOf table (input : #[UInt8]) =
 
 fun val (b : UInt8) index =
   let c = toInt b in
-  if c >= 65 and c <= 70
-  then Ok (c - 55)
-  else if c >= 97 and c <= 102
-  then Ok (c - 87)
-  else if c >= 48 and c <= 57
-  then Ok (c - 48)
+  if c >= 65 and c <= 70 then Ok (c - 55)
+  else if c >= 97 and c <= 102 then Ok (c - 87)
+  else if c >= 48 and c <= 57 then Ok (c - 48)
   else Err (FromHexError.InvalidHexCharacter (charFromCode c) index)
 
 -- The pairs of digits from pair `k` on, into `buf`.
 fun decodePairs (input : #[UInt8]) count =
   let rec check k =
-    if k >= count
-    then Ok ()
+    if k >= count then Ok ()
     else
       match val (arrayGet input (2 * k)) (2 * k) with
       | Err e -> Err e
@@ -80,31 +76,28 @@ fun decodePairs (input : #[UInt8]) count =
           match val (arrayGet input (2 * k + 1)) (2 * k + 1) with
           | Err e -> Err e
           | Ok _ -> check (k + 1)
-  in
-  match check 0 with
-  | Err e -> Err e
-  | Ok _ ->
-      let digit = \i -> match val (arrayGet input i) i with
-                        | Ok v -> v
-                        | Err _ -> 0
-      in
-      Ok
-      (runSt (\() ->
-        let buf = St.newArray count (toUInt8 0) in
-        let _ = St.forRange 0 count (\k -> St.set buf k (toUInt8 (digit (2 * k) * 16 + digit (2 * k + 1)))) in
-        St.freeze buf))
+  in match check 0 with
+     | Err e -> Err e
+     | Ok _ ->
+         let digit = \i -> match val (arrayGet input i) i with | Ok v -> v | Err _ -> 0 in
+         Ok
+           (runSt (\() ->
+              let buf = St.newArray count (toUInt8 0) in
+              let _ =
+                St.forRange 0 count (\k ->
+                  St.set buf k (toUInt8 (digit (2 * k) * 16 + digit (2 * k + 1))))
+              in St.freeze buf))
 
 -- `input`'s hex digits as bytes.
 @pub fun decodeBytes (input : #[UInt8]) =
-  if arrayLen input % 2 != 0 then Err FromHexError.OddLength else decodePairs input (arrayLen input / 2)
+  if arrayLen input % 2 != 0 then Err FromHexError.OddLength
+  else decodePairs input (arrayLen input / 2)
 
 -- The hex digits of `text` as bytes.
 @pub fun decode text = decodeBytes (stringToBytes text)
 
 -- `input`'s hex digits as exactly `size` bytes.
 @pub fun decodeToSlice (input : #[UInt8]) size =
-  if arrayLen input % 2 != 0
-  then Err FromHexError.OddLength
-  else if arrayLen input / 2 != size
-  then Err FromHexError.InvalidStringLength
+  if arrayLen input % 2 != 0 then Err FromHexError.OddLength
+  else if arrayLen input / 2 != size then Err FromHexError.InvalidStringLength
   else decodePairs input size

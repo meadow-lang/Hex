@@ -57,8 +57,7 @@ fun showResult r shown =
 @cfg(test)
 fun runCase i =
   let kind = fst (num i 1) in
-  if kind == 0
-  then
+  if kind == 0 then
     let input = str (i + 1) in
     let lower = str (snd input) in
     let upper = str (snd lower) in
@@ -80,8 +79,7 @@ fun runCase i =
 
 @cfg(test)
 fun check i bad =
-  if i >= stringByteLength cases
-  then bad
+  if i >= stringByteLength cases then bad
   else
     match runCase i with
     | (input, expected, got, next) ->
