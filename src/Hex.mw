@@ -9,8 +9,7 @@ use Std.St as St
 use Hex.Tables (quotedBytes)
 
 @pub data FromHexError
-  = -- A byte that is not a hex digit, taken as a character, and where it is.
-  InvalidHexCharacter Char Int
+  = InvalidHexCharacter Char Int -- A byte that is not a hex digit, taken as a character, and where it is.
   -- An odd number of digits.
   | OddLength
   -- The output is not the size the input needs.
